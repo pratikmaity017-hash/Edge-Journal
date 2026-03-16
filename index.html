@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Trading Journal</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="manifest" href="manifest.json">
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+
+<style>
+
+body{
+font-family: Arial;
+background:#0f172a;
+color:white;
+text-align:center;
+}
+
+button{
+padding:10px 20px;
+background:#3b82f6;
+color:white;
+border:none;
+border-radius:5px;
+margin:10px;
+}
+
+input{
+padding:10px;
+margin:5px;
+}
+
+.card{
+background:#1e293b;
+padding:20px;
+margin:20px;
+border-radius:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Trading Journal</h1>
+
+<button onclick="googleLogin()">Login With Google</button>
+
+<div class="card">
+
+<h3>Add Trade</h3>
+
+<input id="pair" placeholder="Pair">
+
+<input id="entry" placeholder="Entry">
+
+<input id="exit" placeholder="Exit">
+
+<input id="profit" placeholder="Profit / Loss">
+
+<button onclick="saveTrade()">Save Trade</button>
+
+</div>
+
+<div class="card">
+
+<h3>Your Trades</h3>
+
+<div id="trades"></div>
+
+</div>
+
+<script>
+
+const firebaseConfig = {
+
+apiKey: "YOUR_API_KEY",
+
+authDomain: "YOUR_PROJECT.firebaseapp.com",
+
+projectId: "YOUR_PROJECT_ID",
+
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+
+const db = firebase.firestore();
+
+function googleLogin(){
+
+const provider = new firebase.auth.GoogleAuthProvider();
+
+auth.signInWithPopup(provider);
+
+}
+
+auth.onAuthStateChanged(user=>{
+
+if(user){
+
+loadTrades(user.uid);
+
+}
+
+});
+
+function saveTrade(){
+
+let pair = document.getElementById("pair").value;
+
+let entry = document.getElementById("entry").value;
+
+let exit = document.getElementById("exit").value;
+
+let profit = document.getElementById("profit").value;
+
+let user = auth.currentUser;
+
+db.collection("trades").add({
+
+uid:user.uid,
+
+pair:pair,
+
+entry:entry,
+
+exit:exit,
+
+profit:profit,
+
+date:new Date()
+
+});
+
+}
+
+function loadTrades(uid){
+
+db.collection("trades")
+.where("uid","==",uid)
+.onSnapshot(snapshot=>{
+
+let html="";
+
+snapshot.forEach(doc=>{
+
+let t = doc.data();
+
+html += `<p>${t.pair} | Profit: ${t.profit}</p>`;
+
+});
+
+document.getElementById("trades").innerHTML=html;
+
+});
+
+}
+
+</script>
+
+</body>
+
+</html>
