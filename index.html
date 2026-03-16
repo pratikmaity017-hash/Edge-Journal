@@ -1,51 +1,13 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>Trading Journal</title>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<title>Trading Journal Pro</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
 
-<link rel="manifest" href="manifest.json">
-
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-
-<style>
-
-body{
-font-family: Arial;
-background:#0f172a;
-color:white;
-text-align:center;
-}
-
-button{
-padding:10px 20px;
-background:#3b82f6;
-color:white;
-border:none;
-border-radius:5px;
-margin:10px;
-}
-
-input{
-padding:10px;
-margin:5px;
-}
-
-.card{
-background:#1e293b;
-padding:20px;
-margin:20px;
-border-radius:10px;
-}
-
-</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 
@@ -53,11 +15,11 @@ border-radius:10px;
 
 <h1>Trading Journal</h1>
 
-<button onclick="googleLogin()">Login With Google</button>
+<button id="googleLogin">Login with Google</button>
 
-<div class="card">
+<div id="app" style="display:none">
 
-<h3>Add Trade</h3>
+<h2>Add Trade</h2>
 
 <input id="pair" placeholder="Pair">
 
@@ -65,128 +27,21 @@ border-radius:10px;
 
 <input id="exit" placeholder="Exit">
 
-<input id="profit" placeholder="Profit / Loss">
+<input type="file" id="screenshot">
 
-<button onclick="saveTrade()">Save Trade</button>
+<button onclick="addTrade()">Save Trade</button>
 
-</div>
+<h2>Dashboard</h2>
 
-<div class="card">
+<canvas id="equityChart"></canvas>
 
-<h3>Your Trades</h3>
+<h2>Trade History</h2>
 
 <div id="trades"></div>
 
 </div>
 
-<script>
-
-const firebaseConfig = {
-
-apiKey: "YOUR_API_KEY",
-
-authDomain: "YOUR_PROJECT.firebaseapp.com",
-
-projectId: "YOUR_PROJECT_ID",
-
-};
-
-firebase.initializeApp(firebaseConfig);
-
-const auth = firebase.auth();
-
-const db = firebase.firestore();
-
-function googleLogin(){
-
-const provider = new firebase.auth.GoogleAuthProvider();
-
-auth.signInWithPopup(provider);
-
-}
-
-auth.onAuthStateChanged(user=>{
-
-if(user){
-
-loadTrades(user.uid);
-
-}
-
-});
-
-function saveTrade(){
-
-let pair = document.getElementById("pair").value;
-
-let entry = document.getElementById("entry").value;
-
-let exit = document.getElementById("exit").value;
-
-let profit = document.getElementById("profit").value;
-
-let user = auth.currentUser;
-
-db.collection("trades").add({
-
-uid:user.uid,
-
-pair:pair,
-
-entry:entry,
-
-exit:exit,
-
-profit:profit,
-
-date:new Date()
-
-});
-
-}
-
-function loadTrades(uid){
-
-db.collection("trades")
-.where("uid","==",uid)
-.onSnapshot(snapshot=>{
-
-let html="";
-
-snapshot.forEach(doc=>{
-
-let t = doc.data();
-
-html += `<p>${t.pair} | Profit: ${t.profit}</p>`;
-
-});
-
-document.getElementById("trades").innerHTML=html;
-
-});
-
-}
-
-</script>
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyDEbkWccsditI1OA_g_8TW92-cfxbCyDYY",
-    authDomain: "trading-journal-2b1c5.firebaseapp.com",
-    projectId: "trading-journal-2b1c5",
-    storageBucket: "trading-journal-2b1c5.firebasestorage.app",
-    messagingSenderId: "920137829686",
-    appId: "1:920137829686:web:647372cdbc5d4b90d9f797"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-</script>
+<script type="module" src="app.js"></script>
 
 </body>
 
